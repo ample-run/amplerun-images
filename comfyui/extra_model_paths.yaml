@@ -1,0 +1,15 @@
+# ComfyUI model roots inside the AmpleRun container. MODEL_DIR (/cache/model)
+# is the read-only host cache mount; a diffusion template's read_only_mounts
+# must target /cache/model/<folder>/<file> with these folder names.
+amplerun:
+  base_path: /cache/model
+  checkpoints: checkpoints
+  diffusion_models: diffusion_models
+  unet: diffusion_models
+  vae: vae
+  clip: text_encoders
+  text_encoders: text_encoders
+  clip_vision: clip_vision
+  loras: loras
+  controlnet: controlnet
+  upscale_models: upscale_models
