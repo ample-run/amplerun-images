@@ -9,7 +9,7 @@ import time
 
 
 IMAGE = sys.argv[1]
-assert re.fullmatch(r"ghcr\.io/ample-run/amplerun-jupyter@sha256:[0-9a-f]{64}", IMAGE)
+assert re.fullmatch(r"ghcr\.io/ample-run/amplerun-(jupyter|nb-[a-z0-9-]+)@sha256:[0-9a-f]{64}", IMAGE)
 
 
 def docker(*args, timeout=30):
@@ -65,7 +65,7 @@ def create(token):
 try:
     blank = create("")
     assert backend.wait(blank, timeout=15) == 64, "blank authentication did not fail closed"
-    assert "Jupyter requires a per-job runtime credential." in backend.logs(blank)
+    assert re.search(r"(?i)jupyter requires a per-job runtime credential", backend.logs(blank)), "no fail-closed message"
     results = []
     for i, token in enumerate(tokens):
         cid = create(token)

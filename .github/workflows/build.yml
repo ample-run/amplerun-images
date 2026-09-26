@@ -94,9 +94,9 @@ jobs:
           provenance: false
 
       - name: Verify Jupyter authentication (CPU only, no network)
-        if: matrix.name == 'jupyter'
+        if: matrix.name == 'jupyter' || (startsWith(matrix.name, 'nb-') && !endsWith(matrix.name, '-rocm'))
         env:
-          JUPYTER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}jupyter@${{ steps.build.outputs.digest }}
+          JUPYTER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.name }}@${{ steps.build.outputs.digest }}
         run: |
           docker pull "$JUPYTER_IMAGE"
           python3 checks/check-jupyter-image.py "$JUPYTER_IMAGE"
