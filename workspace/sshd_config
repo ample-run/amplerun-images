@@ -1,0 +1,17 @@
+# sshd run as the non-root tenant (uid 10001): only that user can log in,
+# keys and host key live under the writable /work volume, no passwords, no PAM.
+HostKey /work/.ssh/ssh_host_ed25519_key
+PidFile /work/.ssh/sshd.pid
+AuthorizedKeysFile /work/.ssh/authorized_keys
+StrictModes no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+UsePAM no
+AllowUsers tenant
+X11Forwarding no
+# Port forwards are how renters reach web UIs bound to 127.0.0.1 (ssh -L).
+AllowTcpForwarding yes
+# The image's PATH, venv and cache variables, written by the entrypoint.
+PermitUserEnvironment yes
+Subsystem sftp internal-sftp

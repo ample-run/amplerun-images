@@ -1,13 +1,18 @@
-# AmpleRun engine images: build on GitHub-hosted runners and publish PUBLIC
-# packages at ghcr.io/ample-run/amplerun-<engine>. Every image is pushed by
-# digest first; tags are added only after its checks pass. Hosts pin these
-# images by digest, never by tag.
+# AmpleRun images: build the images a dispatch names (from variants.json) on
+# GitHub-hosted runners and publish PUBLIC packages at
+# ghcr.io/ample-run/amplerun-<name>. Every image is pushed by digest first;
+# tags are added only after its checks pass. Hosts pin by digest, never tag.
+#
+#   gh workflow run build.yml -R ample-run/amplerun-images -f images=serve-vllm,nb-pytorch
 name: build
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      images:
+        description: "Comma-separated names from variants.json, e.g. serve-vllm,nb-pytorch"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -21,9 +26,24 @@ env:
   IMAGE_PREFIX: ample-run/amplerun-
 
 jobs:
-  build:
+  plan:
     if: github.repository == 'ample-run/amplerun-images'
-    name: ${{ matrix.engine }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - id: plan
+        env:
+          IMAGES: ${{ inputs.images }}
+        run: node tools/plan-image-builds.mjs "$IMAGES" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     permissions:
@@ -31,9 +51,9 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 6
       matrix:
-        engine: [pytorch, jupyter, ollama, llamacpp, vllm, comfyui, faster-whisper]
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       # Engine images (vLLM, PyTorch/CUDA) exceed the runner's default free
       # disk; drop preinstalled toolchains this workflow never uses.
@@ -58,7 +78,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051  # v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.engine }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.name }}
           tags: |
             type=sha,format=long
             type=raw,value=main
@@ -66,14 +86,15 @@ jobs:
       - id: build
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
         with:
-          context: ${{ matrix.engine }}
+          context: ${{ matrix.context }}
+          build-args: ${{ matrix.build_args }}
           platforms: linux/amd64
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.engine }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.name }},push-by-digest=true,name-canonical=true,push=true
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
 
       - name: Verify Jupyter authentication (CPU only, no network)
-        if: matrix.engine == 'jupyter'
+        if: matrix.name == 'jupyter'
         env:
           JUPYTER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}jupyter@${{ steps.build.outputs.digest }}
         run: |
@@ -84,7 +105,7 @@ jobs:
       # names exactly the digest that was checked.
       - name: Tag the verified digest
         env:
-          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.engine }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.name }}
           DIGEST: ${{ steps.build.outputs.digest }}
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
@@ -97,13 +118,13 @@ jobs:
         run: |
           mkdir -p digests
           printf '{"engine":"%s","image":"%s","digest":"%s","tag":"sha-%s"}\n' \
-            "${{ matrix.engine }}" "${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.engine }}" \
-            "${{ steps.build.outputs.digest }}" "${{ github.sha }}" > "digests/${{ matrix.engine }}.json"
-          cat "digests/${{ matrix.engine }}.json" | tee -a "$GITHUB_STEP_SUMMARY"
+            "${{ matrix.name }}" "${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}${{ matrix.name }}" \
+            "${{ steps.build.outputs.digest }}" "${{ github.sha }}" > "digests/${{ matrix.name }}.json"
+          cat "digests/${{ matrix.name }}.json" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
-          name: digest-${{ matrix.engine }}
-          path: digests/${{ matrix.engine }}.json
+          name: digest-${{ matrix.name }}
+          path: digests/${{ matrix.name }}.json
           if-no-files-found: error
           retention-days: 90

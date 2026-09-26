@@ -15,6 +15,7 @@ Container images that [AmpleRun](https://amplerun.com) GPU rentals run on.
 | `faster-whisper` | Speech to text |
 | `pytorch` | SSH workspace |
 | `jupyter` | Notebooks |
+| `workspace` | One wrapper, many images: each name in `variants.json` pins an upstream base and the app it runs |
 
 ## Sandbox contract
 
@@ -27,6 +28,6 @@ Model weights are not baked into the images. They are mounted or pulled at runti
 
 ## Build
 
-A push to `main` builds every engine on GitHub-hosted runners (`.github/workflows/build.yml`). Each build uploads a `digest-<engine>` artifact.
+Builds run on GitHub-hosted runners when dispatched (`.github/workflows/build.yml`, input `images` = names from `variants.json`). Each build uploads a `digest-<name>` artifact.
 
 This repository is a published snapshot. Changes come from AmpleRun maintainers.

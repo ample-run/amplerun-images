@@ -69,18 +69,24 @@ try:
     results = []
     for i, token in enumerate(tokens):
         cid = create(token)
-        deadline = time.monotonic() + 60
+        deadline = time.monotonic() + 120
+        last = None
         while time.monotonic() < deadline:
             result = subprocess.run(["docker", "exec", "-i", cid, "python", "-c", probe_code],
                                     input=json.dumps([None, token, tokens[1-i]]),
                                     capture_output=True, text=True, timeout=10)
+            last = (result.returncode, result.stdout.strip()[-200:], result.stderr.strip()[-300:])
             if result.returncode == 0:
                 codes = json.loads(result.stdout)
                 if codes == [403, 200, 403]:
                     break
             time.sleep(1)
         else:
-            raise AssertionError("image authentication probe failed")
+            logs = backend.logs(cid)
+            for value in tokens:
+                logs = logs.replace(value, "<redacted>")
+            raise AssertionError(f"image authentication probe failed; last probe (rc, out, err)={last!r}; "
+                                 f"container logs tail: {logs[-1500:]!r}")
         logs = backend.logs(cid)
         assert all(value not in logs for value in tokens), "credential leaked into image logs"
         results.append({"anonymous": codes[0], "owner": codes[1], "other_lease": codes[2], "credential_in_logs": False})

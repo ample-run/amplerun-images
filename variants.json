@@ -1,0 +1,56 @@
+{
+  "_comment": "Every image images.yml can build, by name. The name is also the GHCR package (ghcr.io/spiry-ro/amplerun-<name>) and the digest artifact key pin-template-digests.mjs reads. Legacy engine images build from their own directory; catalog v2 images build templates/images/workspace with the args below. Every BASE is pinned by tag and digest; digests verified via the registry API on verified_at (re-check: node scripts/verify-template-upstreams.mjs). NOT BUILT until dispatched.",
+  "verified_at": "2026-09-26",
+  "images": {
+    "vllm": { "context": "vllm" },
+    "llamacpp": { "context": "llamacpp" },
+    "comfyui": { "context": "comfyui" },
+    "faster-whisper": { "context": "faster-whisper" },
+    "pytorch": { "context": "pytorch" },
+    "jupyter": { "context": "jupyter" },
+    "ollama": { "context": "ollama" },
+
+    "serve-vllm": { "context": "workspace", "args": { "BASE": "vllm/vllm-openai:v0.30.0-cu129@sha256:a67f8f186d4567612ac37a55bd82295006002b18858eb12a8af2f05f86c2ae3f", "APP": "vllm" } },
+    "serve-sglang": { "context": "workspace", "args": { "BASE": "lmsysorg/sglang:v0.5.19-cu129-runtime@sha256:fe08f6f52bea380415792849a703d92279c86320f8c39283bcd04043f8b63c41", "APP": "sglang" } },
+    "serve-tgi": { "context": "workspace", "args": { "BASE": "ghcr.io/huggingface/text-generation-inference:3.3.7@sha256:c01c6b7c308798b66db1f37175c2e937325d2f19b212a5f220dbafb230821f11", "APP": "tgi" } },
+    "serve-vllm-rocm": { "context": "workspace", "args": { "BASE": "vllm/vllm-openai-rocm:v0.30.0@sha256:2e7da1ad1c66836802072588adea75f9f4991da5f9545b4318e91d422c22ce6a", "APP": "vllm" } },
+    "ws-vllm": { "context": "workspace", "args": { "BASE": "vllm/vllm-openai:v0.30.0-cu129@sha256:a67f8f186d4567612ac37a55bd82295006002b18858eb12a8af2f05f86c2ae3f", "APP": "shell" } },
+    "ws-sglang": { "context": "workspace", "args": { "BASE": "lmsysorg/sglang:v0.5.19-cu129-runtime@sha256:fe08f6f52bea380415792849a703d92279c86320f8c39283bcd04043f8b63c41", "APP": "shell" } },
+    "ws-llamacpp": { "context": "workspace", "args": { "BASE": "ghcr.io/ggml-org/llama.cpp:full-cuda12-b11176@sha256:6fad80d874dbbe57562bdb07034ef3296b111cec691728889bafa9a67a35eaf5", "APP": "llamacpp-cli" } },
+    "ollama-tunnel": { "context": "workspace", "args": { "BASE": "ollama/ollama:0.34.4@sha256:8262851b2846b87c649eddf3e76beb270c52f4d1bc94559f47efde16b0841551", "APP": "ollama" } },
+    "ollama-tunnel-rocm": { "context": "workspace", "args": { "BASE": "ollama/ollama:0.34.4-rocm@sha256:f1f51e73691bd77e38a30b61f745f8d074fc664967ba8e209989091bd73b5adc", "APP": "ollama" } },
+    "open-webui": { "context": "workspace", "args": { "BASE": "ghcr.io/open-webui/open-webui:v0.11.4-ollama@sha256:79b7568a0bfdd30212eaa47a24236351260731766d30326e66a9fb934b32f689", "APP": "open-webui" } },
+
+    "ws-axolotl": { "context": "workspace", "args": { "BASE": "axolotlai/axolotl:0.19.0@sha256:9de7c7a5b8830480a7d2eb3b6d49759586615f5f8eb1126d5df29f8bd9fa324b", "APP": "shell" } },
+    "nb-unsloth": { "context": "workspace", "args": { "BASE": "unsloth/unsloth:core-nightly-2026.09.24@sha256:82ca28836356f94c2ed4b041e2d0900aadfddb115d58ba63f6f7e22f92fad0a1", "APP": "jupyter" } },
+    "ft-llamafactory": { "context": "workspace", "args": { "BASE": "hiyouga/llamafactory:0.9.5@sha256:c5e769e047a19f9322800c9881a6270557ef0e6682f0145b50b322f8724de6b6", "APP": "llamafactory" } },
+    "ws-torchtune": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.7.1-cuda12.6-cudnn9-devel@sha256:639b8229ccfd8a3aa803cf49c33d6d6fe406750d79aaf723fe8c0eb1060d8cff", "APP": "shell", "EXTRA_PIP": "torchtune==0.6.1 torchao==0.11.0" } },
+
+    "nb-pytorch": { "context": "workspace", "args": { "BASE": "quay.io/jupyter/pytorch-notebook:cuda12-2026-09-21@sha256:dfdd544ac7fb03e67065464029511079e64c38d74e18eb93a161f6c4b27d6a8a", "APP": "jupyter" } },
+    "nb-tensorflow": { "context": "workspace", "args": { "BASE": "quay.io/jupyter/tensorflow-notebook:cuda-2026-09-21@sha256:4ff71a3b7dd311f7ff574a7c60dd8e76ad0d4d7e785db3bc4e4265a13ecb6aa5", "APP": "jupyter" } },
+    "nb-jax": { "context": "workspace", "args": { "BASE": "quay.io/jupyter/scipy-notebook:2026-09-21@sha256:c88fd047a38689b1fe621309eaa91d1f0637c5c1ef3bccb7509cfa92d2b508ca", "APP": "jupyter", "EXTRA_PIP": "jax[cuda12]==0.11.2" } },
+    "nb-rapids": { "context": "workspace", "args": { "BASE": "rapidsai/notebooks:26.08-cuda12-py3.12@sha256:72f5e3025dbd0575bf7c3499563bb9b982fe350142a59a2fd91141d7d973af1b", "APP": "jupyter" } },
+    "nb-pytorch-rocm": { "context": "workspace", "args": { "BASE": "rocm/pytorch:rocm7.14.1_ubuntu24.04_py3.12_pytorch_release_2.12.0@sha256:cc9b00f90b85c97b015b040fa55c8d1b404b7cacc6ad57d74ee3451c97508da1", "APP": "jupyter", "EXTRA_PIP": "jupyterlab==4.6.4" } },
+    "dev-code-server": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.8.0-cuda12.8-cudnn9-devel@sha256:a7103283ea7113e10ae5d014bd2342acebda0bc53164b2f7b1dd6eb7a766bdb6", "APP": "code-server", "APP_URL": "https://github.com/coder/code-server/releases/download/v4.138.0/code-server-4.138.0-linux-amd64.tar.gz", "APP_SHA256": "5d63f26c5dabc2acd29610b9b27f413b016aa67019e2cfcdf54031625e18f535" } },
+    "base-cuda-12-4": { "context": "workspace", "args": { "BASE": "nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04@sha256:622e78a1d02c0f90ed900e3985d6c975d8e2dc9ee5e61643aed587dcf9129f42", "APP": "shell" } },
+    "base-cuda-12-9": { "context": "workspace", "args": { "BASE": "nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04@sha256:a2e1e2360c85298ac47ec2543b406ab1e8cec42e31ee47e4d32140ebc82e1067", "APP": "shell" } },
+    "base-cuda-13-0": { "context": "workspace", "args": { "BASE": "nvidia/cuda:13.0.2-cudnn-devel-ubuntu24.04@sha256:e071e85c52ad91fc9ea24158ff5330876b2d1a5c4ac83ccc6066976835873c01", "APP": "shell" } },
+    "base-cuda-13-4": { "context": "workspace", "args": { "BASE": "nvidia/cuda:13.4.1-cudnn-devel-ubuntu24.04@sha256:4862208a2c62238d7b8dd26e525293d5fce4b35c4b3ae90407e75057d669346c", "APP": "shell" } },
+    "ws-pytorch-cu13": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.14.0-cuda13.0-cudnn9-runtime@sha256:9c99fafa01edfaa3d16da8c209b38b5970bb6fd6e72725ef60efc901489f70c6", "APP": "shell" } },
+    "ws-pytorch-rocm": { "context": "workspace", "args": { "BASE": "rocm/pytorch:rocm7.14.1_ubuntu24.04_py3.12_pytorch_release_2.12.0@sha256:cc9b00f90b85c97b015b040fa55c8d1b404b7cacc6ad57d74ee3451c97508da1", "APP": "shell" } },
+
+    "img-comfyui": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "APP": "comfyui", "APP_REF": "8ff6dc384ba5c410266b40e137799e049459d4f2", "EXTRA_PIP": "huggingface_hub==2.0.0" } },
+    "img-comfyui-rocm": { "context": "workspace", "args": { "BASE": "rocm/pytorch:rocm7.14.1_ubuntu24.04_py3.12_pytorch_release_2.12.0@sha256:cc9b00f90b85c97b015b040fa55c8d1b404b7cacc6ad57d74ee3451c97508da1", "APP": "comfyui", "APP_REF": "8ff6dc384ba5c410266b40e137799e049459d4f2", "EXTRA_PIP": "huggingface_hub==2.0.0" } },
+    "img-forge": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "APP": "forge", "APP_URL": "https://github.com/lllyasviel/stable-diffusion-webui-forge.git", "APP_REF": "dfdcbab685e57677014f05a3309b48cc87383167" } },
+    "img-a1111": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "APP": "a1111", "APP_URL": "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git", "APP_REF": "82a973c04367123ae98bd9abdf80d9eda9b910e2" } },
+    "img-fooocus": { "context": "workspace", "args": { "BASE": "ghcr.io/lllyasviel/fooocus:2.5.5@sha256:a1c3251054a38c22f783b680600050bedf7fe547d0239a8d772d0d372a98a5ce", "APP": "fooocus" } },
+
+    "audio-speaches": { "context": "workspace", "args": { "BASE": "ghcr.io/speaches-ai/speaches:0.8.3-cuda-12.6.3@sha256:c0da392c37e76a01ba479239b43124c67baf8913ae0f491071d6ac544641dad7", "APP": "speaches" } },
+    "audio-whisperx": { "context": "workspace", "args": { "BASE": "pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "APP": "shell", "EXTRA_PIP": "whisperx==3.8.6" } },
+    "audio-kokoro": { "context": "workspace", "args": { "BASE": "ghcr.io/remsky/kokoro-fastapi-gpu:v0.9.0-cu128@sha256:c6683ee24a3b3bc3b49130ecc52c32e8010a1052ae32781a91682fa09c6ba984", "APP": "kokoro" } },
+
+    "render-blender": { "context": "workspace", "args": { "BASE": "nvidia/cuda:12.9.1-cudnn-runtime-ubuntu24.04@sha256:d02c4310b6d57ca0b16cd80298bdb33a74187baafe2eccd8a6a16180ddc90802", "APP": "blender", "APP_URL": "https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz", "APP_SHA256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168" } },
+
+    "eval-lm-eval": { "context": "workspace", "args": { "BASE": "vllm/vllm-openai:v0.30.0-cu129@sha256:a67f8f186d4567612ac37a55bd82295006002b18858eb12a8af2f05f86c2ae3f", "APP": "shell", "EXTRA_PIP": "lm_eval==0.4.13" } }
+  }
+}
