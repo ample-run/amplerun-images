@@ -1,0 +1,14 @@
+# sshd run as the non-root tenant user (uid 10001): only that user can log
+# in, keys live under the writable /work volume, no passwords, no PAM.
+HostKey /work/.ssh/ssh_host_ed25519_key
+PidFile /work/.ssh/sshd.pid
+AuthorizedKeysFile /work/.ssh/authorized_keys
+StrictModes no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+UsePAM no
+AllowUsers tenant
+X11Forwarding no
+AllowTcpForwarding yes
+Subsystem sftp internal-sftp

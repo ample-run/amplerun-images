@@ -15,6 +15,7 @@ Container images that [AmpleRun](https://amplerun.com) GPU rentals run on.
 | `faster-whisper` | Speech to text |
 | `pytorch` | SSH workspace |
 | `jupyter` | Notebooks |
+| `pytorch-rocm`, `vllm-rocm`, `ollama-rocm`, `llamacpp-rocm` | AMD ROCm twins of the same engines (`required_runtime: rocm-hip`); not in `variants.json`, not built |
 | `workspace` | One wrapper, many images: each name in `variants.json` pins an upstream base and the app it runs |
 
 ## Sandbox contract

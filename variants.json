@@ -50,6 +50,8 @@
     "audio-kokoro": { "context": "workspace", "args": { "BASE": "ghcr.io/remsky/kokoro-fastapi-gpu:v0.9.0-cu128@sha256:c6683ee24a3b3bc3b49130ecc52c32e8010a1052ae32781a91682fa09c6ba984", "APP": "kokoro" } },
 
     "render-blender": { "context": "workspace", "args": { "BASE": "nvidia/cuda:12.9.1-cudnn-runtime-ubuntu24.04@sha256:d02c4310b6d57ca0b16cd80298bdb33a74187baafe2eccd8a6a16180ddc90802", "APP": "blender", "APP_URL": "https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz", "APP_SHA256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168" } },
+    "render-blender-rocm": { "context": "workspace", "args": { "BASE": "rocm/dev-ubuntu-24.04:6.4.4@sha256:abca59c7122732bfebf17c93399d238f08196f0413179f513ace3de2297a0e44", "APP": "blender", "APP_URL": "https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz", "APP_SHA256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168" } },
+    "render-blender-oneapi": { "context": "workspace", "args": { "BASE": "intel/oneapi-runtime:2026.0.0-devel-ubuntu24.04@sha256:f882b07dca44ae94f3a601de564cdc3d103195571cafd0daa8dd843301b24442", "APP": "blender", "APP_URL": "https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz", "APP_SHA256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168" } },
 
     "eval-lm-eval": { "context": "workspace", "args": { "BASE": "vllm/vllm-openai:v0.30.0-cu129@sha256:a67f8f186d4567612ac37a55bd82295006002b18858eb12a8af2f05f86c2ae3f", "APP": "shell", "EXTRA_PIP": "lm_eval==0.4.13" } }
   }
