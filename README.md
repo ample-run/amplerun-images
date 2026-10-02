@@ -17,6 +17,7 @@ Container images that [AmpleRun](https://amplerun.com) GPU rentals run on.
 | `jupyter` | Notebooks |
 | `pytorch-rocm`, `vllm-rocm`, `ollama-rocm`, `llamacpp-rocm` | AMD ROCm twins of the same engines (`required_runtime: rocm-hip`); not in `variants.json`, not built |
 | `workspace` | One wrapper, many images: each name in `variants.json` pins an upstream base and the app it runs |
+| `*-xpu`, `render-blender-oneapi` (workspace variants) | Intel Arc twins over `intel/oneapi-runtime` (Level Zero), PyTorch from the pinned XPU wheels |
 
 ## Sandbox contract
 

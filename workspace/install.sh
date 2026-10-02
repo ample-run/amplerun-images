@@ -29,6 +29,11 @@ mkdir -p /work /cache /run/sshd
 chown 10001:10001 /work
 
 export PIP_NO_CACHE_DIR=1 PIP_BREAK_SYSTEM_PACKAGES=1
+# Bases without Python (e.g. intel/oneapi-runtime for the -xpu variants) get
+# the distro's; every other base already has pip, so this is a no-op there.
+if [ -n "$EXTRA_PIP" ] || [ "$APP" = comfyui ]; then
+  python3 -m pip --version >/dev/null 2>&1 || apt_install python3 python3-pip
+fi
 # shellcheck disable=SC2086 # EXTRA_PIP is a list of pinned requirement specs
 [ -z "$EXTRA_PIP" ] || python3 -m pip install $EXTRA_PIP
 
