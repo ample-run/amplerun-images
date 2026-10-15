@@ -1,0 +1,77 @@
+# AmpleRun AI Speed probe for Apple silicon (aispeed-darwin-v1): build the
+# Metal binary on a GitHub-hosted macOS runner and publish it as a PUBLIC
+# GitHub Release asset with its sha256. Hosts never run it until the
+# integrator pins the asset's sha256 in host-agent/aispeed-runtime.json
+# (signed with the host-agent payload). A new build is a new release and a
+# new pin, never an edit in place.
+#
+#   gh workflow run aispeed-darwin.yml -R ample-run/amplerun-images
+name: aispeed-darwin
+
+on:
+  push:
+    paths: ["aispeed-darwin/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aispeed-darwin-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'ample-run/amplerun-images'
+    runs-on: macos-15
+    timeout-minutes: 30
+    outputs:
+      build: ${{ steps.pack.outputs.build }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - name: Build (arm64, release)
+        run: swift build -c release --arch arm64 --package-path aispeed-darwin
+      - name: Smoke run (one JSON line, check pass or an honest no-device exit)
+        run: |
+          set +e
+          out="$(aispeed-darwin/.build/arm64-apple-macosx/release/aispeed-darwin-arm64)"
+          rc=$?
+          echo "$out"
+          # Hosted macOS runners may expose a paravirtual GPU or none (exit 2).
+          [ "$rc" = 0 ] || [ "$rc" = 2 ] || exit 1
+          [ "$rc" = 2 ] || echo "$out" | python3 -c 'import json,sys; json.loads(sys.stdin.read())'
+      - id: pack
+        name: Pack and hash
+        run: |
+          build="aispeed-${GITHUB_RUN_NUMBER}"
+          tar -C aispeed-darwin/.build/arm64-apple-macosx/release -czf "$build-darwin-arm64.tar.gz" aispeed-darwin-arm64
+          shasum -a 256 "$build-darwin-arm64.tar.gz" | tee "$build-darwin-arm64.tar.gz.sha256"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: aispeed-darwin-arm64
+          path: aispeed-*-darwin-arm64.tar.gz*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: github.repository == 'ample-run/amplerun-images'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
+        with:
+          name: aispeed-darwin-arm64
+      - name: Publish release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD: ${{ needs.build.outputs.build }}
+        run: |
+          gh release create "$BUILD" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "$BUILD (AI Speed probe, Apple silicon)" \
+            --notes "aispeed-darwin-v1 binary for Apple silicon. sha256: $(cut -d' ' -f1 "$BUILD-darwin-arm64.tar.gz.sha256")" \
+            "$BUILD-darwin-arm64.tar.gz" "$BUILD-darwin-arm64.tar.gz.sha256"
